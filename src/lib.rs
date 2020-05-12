@@ -45,11 +45,11 @@ fn generate_type_aliases(
     fn_return_type: Box<Type>,
     fn_name: &syn::Ident,
 ) -> Vec<proc_macro2::TokenStream> {
-    let type_t0 = format_ident!("_{}_T0", fn_name);
+    let type_t0 = format_ident!("_T0{}", fn_name);
     let mut type_aliases = vec![quote! { type #type_t0 = #fn_return_type }];
     for (i, t) in (1..).zip(fn_arg_types.into_iter().rev()) {
-        let p = format_ident!("_{}_{}", fn_name, format!("T{}", i - 1));
-        let n = format_ident!("_{}_{}", fn_name, format!("T{}", i));
+        let p = format_ident!("_{}{}", format!("T{}", i - 1), fn_name);
+        let n = format_ident!("_{}{}", format!("T{}", i), fn_name);
         type_aliases.push(quote! {
             type #n = impl Fn(#t) -> #p
         })
@@ -83,7 +83,7 @@ fn generate_curry(parsed: ItemFn) -> proc_macro2::TokenStream {
         &fn_name,
     );
 
-    let return_type = format_ident!("_{}_{}", &fn_name, format!("T{}", type_aliases.len() - 1));
+    let return_type = format_ident!("_{}{}", format!("T{}", type_aliases.len() - 1), &fn_name);
 
     let gen = quote! {
         #(#type_aliases);* ;
